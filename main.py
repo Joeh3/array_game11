@@ -97,27 +97,15 @@ def start():
         pygame.clock.tick(60)
         pygame.display.set_caption(f'DEATH CAPITAL, INC.      |      (FPS):{round(pygame.clock.get_fps())}')
 
-# def credits():
-#     '''
-#     Credits Screen Function
-#     Description: Handles the start screen for the game
-#     '''
-#     dots = ''
-#     while True:
-#         if button_start.state:
-#             sound_start.play()
-#             return game()
-        
-#         text = text_main.render('DEATH CAPITAL, INC.',False,colors['main'])
-#         window.blit(text, (scrx/2-text.width/2,scry/2-text.height/2-100))
+def credits(surf,color,end_y):
+    '''
+    Credits Screen Function
+    Description: Handles the start screen for the game
+    '''
+    text = open(os.path.join('assets','credits.txt')).read()
+    surface_text = text_end.render(text,False,color, wraplength=scrx-250)
+    window.blit(surface_text, (scrx/2-surface_text.width/2,scry-end_y))
 
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 shut_down()
-
-#         pygame.display.update()
-#         pygame.clock.tick(60)
-#         pygame.display.set_caption(f'DEATH CAPITAL, INC.      |      (FPS):{round(pygame.clock.get_fps())}')
 
 
 def shut_down():
@@ -126,6 +114,7 @@ def shut_down():
     Description: For a styllistic shutting down of the system
     '''
     dots = ''
+    pygame.mixer.music.stop()
     while True:
         window.fill(colors['bg'])
 
@@ -163,6 +152,7 @@ def truebad_end():
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play()
 
+    end_y = 0
     #for 3d
     rotate = 0.7
     zoom = 0
@@ -173,12 +163,15 @@ def truebad_end():
 
         if abs(dz) > 0.05:
             zoom = 0
+
+        if not pygame.mixer.music.get_busy():
+            shut_down()
         
 
         
         # add credits scene here
-        text = text_main.render('True Bad End\nDeath Capital Inc.\na Math 154 Final Project by Group Mayad',False,'white')
-        window.blit(text, (scrx/2-text.width/2,scry/2-text.height/2))
+        credits(window,'white',end_y)
+        end_y +=0.5
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -214,12 +207,20 @@ def bad_end():
     pygame.mixer.music.load(os.path.join('assets','audios','bad_end.mp3'))
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play()
+
+    end_y = 0
     while True:
         window.fill(colors['bg'])
 
         # add credits scene here
-        text = text_main.render('True Bad End\nDeath Capital Inc.\na Math 154 Final Project by Group Mayad',False,'white')
-        window.blit(text, (scrx/2-text.width/2,scry/2-text.height/2))
+        # text = text_main.render('True Bad End\nDeath Capital Inc.\na Math 154 Final Project by Group Mayad',False,'white')
+        # window.blit(text, (scrx/2-text.width/2,scry/2-text.height/2))
+
+        credits(window,colors['main'],end_y)
+        end_y+=0.5
+
+        if not pygame.mixer.music.get_busy():
+            shut_down()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -280,7 +281,12 @@ def game():
         # window.blit(text_main.render('LOGO',False,colors['bg']),(((scrx-screen_margin+700)/2,(305)/2)))
         
         # time bar
-        pygame.draw.rect(window, colors['ui'], pygame.Rect((viewport.pos[0], scry/20),((viewport.interval - pygame.time.get_ticks())/(2*interval/1000),10)))
+        if not paused:
+            pygame.draw.rect(window, colors['ui'], pygame.Rect((viewport.pos[0], scry/20),((viewport.interval - pygame.time.get_ticks())/(2*interval/1000),10)))
+        else:
+            pause_text = text_main.render('PAUSED',False,colors['bg'])
+            pygame.draw.rect(window, colors['ui'], pygame.Rect((viewport.pos[0], scry/20-pause_text.height/2),(viewport.width,40)))
+            window.blit(pause_text, (viewport.pos[0]+viewport.width/2-pause_text.width/2,scry/20-pause_text.height/2-2))
         
         ''' ending check '''
         if not phenomena.end:
@@ -387,4 +393,5 @@ def game():
         pygame.display.set_caption(f'DEATH CAPITAL, INC.      |      (FPS):{round(pygame.clock.get_fps())}')
 
 # game()
-start()
+# start()
+truebad_end()
